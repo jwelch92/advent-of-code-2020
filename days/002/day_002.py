@@ -1,7 +1,8 @@
-import re
 from dataclasses import dataclass
+from parse import compile
+from typing import Callable, Iterable
 
-pat = re.compile(r'^(?P<minimum>\d+)-(?P<maximum>\d+)\s(?P<letter>\w):\s(?P<password>\w+)$')
+pat = compile("{minimum}-{maximum} {letter}: {password}")
 
 
 @dataclass
@@ -22,24 +23,21 @@ class PasswordEntry:
     def positional_validation(self) -> bool:
         first = self.minimum - 1 if self.minimum > 0 else self.minimum
         last = self.maximum - 1
-
         try:
-            valid = (self.password[first] == self.letter) != (self.password[last] == self.letter)
-            return valid
+            return (self.password[first] == self.letter) != (self.password[last] == self.letter)
         except IndexError:
             return False
 
 
-def read(parser_func=None):
+def read(parser_func: Callable) -> Iterable[PasswordEntry]:
     with open('input.txt') as f:
-        data = f.readlines()
-    for line in data:
-        yield parser_func(line)
+        for line in f.readlines():
+            yield parser_func(line)
 
 
 def parser(line: str) -> PasswordEntry:
-    g = pat.match(line.strip())
-    return PasswordEntry(**g.groupdict())
+    g = pat.parse(line.strip())
+    return PasswordEntry(**g.named)
 
 
 def part_one():

@@ -2,15 +2,13 @@ import itertools
 import math
 
 
-def parse_input(file, parse_int=False):
+def parse_input(file: str, parse_int: bool = False):
     with open(file) as f:
-        data = f.readlines()
-    return [int(x.strip()) if parse_int else x.strip() for x in data]
+        return [int(x.strip()) if parse_int else x.strip() for x in f.readlines()]
 
 
-def search(size: int):
+def search(size: int) -> int:
     data = parse_input("input.txt", parse_int=True)
-    print(data)
     for x in itertools.combinations(data, size):
         if sum(x) == 2020:
             return math.prod(x)
