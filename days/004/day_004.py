@@ -1,20 +1,26 @@
 import re
+from typing import List
 
 
-def validate_hgt(hgt):
+def validate_hgt(hgt: str) -> bool:
     # hgt (Height) - a number followed by either cm or in:
     # If cm, the number must be at least 150 and at most 193.
     # If in, the number must be at least 59 and at most 76.
-    pass
+    if "cm" in hgt:
+        return 150 <= int(hgt.replace("cm", "")) <= 193
+    elif "in" in hgt:
+        return 59 <= int(hgt.replace("in", "")) <= 76
+    else:
+        return False
 
 
 hcl_re = re.compile(r'#[a-z0-9]{6}')
 ecl_values = "amb blu brn gry grn hzl oth".split(" ")
 
 fields = [
-    ("byr:", True, lambda x: 1920 <= int(x) <= 2002), # four digits; at least 1920 and at most 2002.
-    ("iyr:", True, lambda x: 2010 <= int(x) <= 2020), # four digits; at least 2010 and at most 2020.
-    ("eyr:", True, lambda x: 2020 <= int(x) <= 2030), # four digits; at least 2020 and at most 2030.
+    ("byr:", True, lambda x: 1920 <= int(x) <= 2002),  # four digits; at least 1920 and at most 2002.
+    ("iyr:", True, lambda x: 2010 <= int(x) <= 2020),  # four digits; at least 2010 and at most 2020.
+    ("eyr:", True, lambda x: 2020 <= int(x) <= 2030),  # four digits; at least 2020 and at most 2030.
     ("hgt:", True, validate_hgt),
     ("hcl:", True, lambda x: hcl_re.match(x)),  # a # followed by exactly six characters 0-9 or a-f.
     ("ecl:", True, lambda x: x in ecl_values),  # exactly one of: amb blu brn gry grn hzl oth.
@@ -23,7 +29,7 @@ fields = [
 ]
 
 
-def read():
+def read() -> List[str]:
     output = []
     with open('input.txt') as f:
         acc = ""
@@ -39,9 +45,9 @@ def read():
     return output
 
 
-def validate_part_one(x):
-    for m, req, _ in fields:
-        if m not in x and req:
+def validate_part_one(passport) -> bool:
+    for field, required, _ in fields:
+        if field not in passport and required:
             return False
     return True
 
@@ -50,20 +56,19 @@ def part_one():
     print('Part one')
     lines = read()
     valid = [x for x in lines if validate_part_one(x)]
-    print(len(valid))
+    print("Total valid", len(valid))
 
-def get_field(x, f):
-    for c in x.split(" "):
-        if c.startswith(f):
+
+def get_field(passport: str, field: str):
+    for c in passport.split(" "):
+        if c.startswith(field):
             return c.split(":")[-1]
 
-def validate_part_two(x):
-    for m, req, v in fields:
-        if req:
-            if m not in x:
-                return False
-            else:
-                return v(get_field(x, m))
+
+def validate_part_two(passport: str) -> bool:
+    for field, required, validator in fields:
+        if required and (field not in passport or not validator(get_field(passport, field))):
+            return False
     return True
 
 
@@ -71,7 +76,7 @@ def part_two():
     print('Part two')
     lines = read()
     valid = [x for x in lines if validate_part_two(x)]
-    print(len(valid))
+    print("Total valid", len(valid))
 
 
 if __name__ == '__main__':
