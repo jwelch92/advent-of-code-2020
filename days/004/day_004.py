@@ -41,7 +41,8 @@ def read() -> List[str]:
             else:
                 output.append(acc.strip())
                 acc = ""
-        output.append(acc)
+        else:
+            output.append(acc)
     return output
 
 
