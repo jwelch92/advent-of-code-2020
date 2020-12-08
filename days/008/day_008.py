@@ -10,41 +10,69 @@ def read() -> List[str]:
         return [x.strip() for x in f.readlines()]
 
 
-@dataclass(frozen=True)
-class Frame:
-    op: str = field(hash=True)
-    data: int = field(hash=True)
-    acc: int = field(hash=True, default=0)
+# @dataclass(frozen=True)
+# class Frame:
+#     op: str = field(hash=True)
+#     data: int = field(hash=True)
+#     acc: int = field(hash=True, default=0)
 
 
 @dataclass
 class Instruction:
-    op: str = field(hash=True)
-    data: int = field(hash=True)
-    index: int = field(hash=True)
+    op: str
+    data: int
+    marked: bool
 
     @classmethod
-    def from_instruction(cls, index: int, line: str) -> "Instruction":
+    def from_instruction(cls, line: str) -> "Instruction":
         parsed = parse.parse("{op} {data:d}", line)
-        return cls(index=index, op=parsed.named["op"], data=parsed.named["data"])
+        return cls(op=parsed.named["op"], data=parsed.named["data"], marked=False)
+
+    def mark(self):
+        self.marked = True
+
+    def reset(self):
+        self.marked = False
+
+    def repair(self):
+        if self.op == "jmp":
+            self.op = "nop"
+        elif self.op == "nop":
+            self.op = "jmp"
+
+
+class InfiniteLoopError(Exception):
+    pass
+
+
+class ProgramComplete(Exception):
+    pass
 
 
 class Machine:
-    def __init__(self):
+    def __init__(self, program):
         self.acc = 0
-        # self.stack: set[Frame] = set()  # maybe make a stack
-        self.covered: dict[int, bool] = defaultdict(lambda: False)
         self.cursor = 0
+        self.program = program
 
-    def run_part_one(self, program):
+    def boot(self):
+        self.acc = 0
+        self.cursor = 0
+        for i in self.program:
+            i.reset()
+
+    def execute(self):
+        self._execute_program(self.program)
+
+    def _execute_program(self, program):
         while True:
-            if self.covered[self.cursor]:
-                return self.acc
+            try:
+                inst = program[self.cursor]
+            except IndexError:
+                raise ProgramComplete
 
-            self.covered[self.cursor] = True
-
-            line = program[self.cursor]
-            inst = Instruction.from_instruction(self.cursor, line)
+            if inst.marked:
+                raise InfiniteLoopError
 
             if inst.op == "acc":
                 self._handle_acc(inst)
@@ -52,7 +80,23 @@ class Machine:
                 self._handle_jmp(inst)
             else:
                 self._handle_nop(inst)
-            self.debug()
+
+            inst.mark()
+            self.print_debug()
+
+    def debug_infinite(self):
+        candidate_instructions = [i for i, instruction in enumerate(self.program) if instruction.op in ("jmp", "nop")]
+
+        for index in candidate_instructions:
+            print("repairing ", index)
+            program = self.program
+            try:
+                program[index].repair()
+                self.boot()
+                self._execute_program(program)
+                program[index].repair()
+            except InfiniteLoopError:
+                program[index].repair()
 
     def _handle_acc(self, inst):
         self.acc += inst.data
@@ -64,18 +108,26 @@ class Machine:
     def _handle_nop(self, inst):
         self.cursor += 1
 
-    def debug(self):
+    def print_debug(self):
         print(f"cursor={self.cursor} acc={self.acc}")
+
 
 def part_one():
     print('Part one')
-    m = Machine()
-    m.run_part_one(read())
-
+    m = Machine([Instruction.from_instruction(line) for line in read()])
+    try:
+        m.execute()
+    except InfiniteLoopError:
+        print("acc", m.acc)
 
 
 def part_two():
     print('Part two')
+    m = Machine([Instruction.from_instruction(line) for line in read()])
+    try:
+        m.debug_infinite()
+    except ProgramComplete:
+        print("acc", m.acc)
 
 
 if __name__ == '__main__':

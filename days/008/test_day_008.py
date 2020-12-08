@@ -1,6 +1,7 @@
 import unittest
 
-from .day_008 import Machine, Frame, Instruction
+from .day_008 import Machine, Instruction, InfiniteLoopError
+
 
 class MyTestCase(unittest.TestCase):
     def test_part_one(self):
@@ -15,10 +16,12 @@ jmp -4
 acc +6
 """
         expected_output = 5 # value in acc before infinite loop
-        m = Machine()
-        acc = m.run_part_one(puzzle_input.splitlines())
-        print(acc)
-        self.assertEqual(acc, expected_output)
+        m = Machine([Instruction.from_instruction(line) for line in puzzle_input.splitlines()])
+
+        try:
+            m.execute()
+        except InfiniteLoopError:
+            self.assertEqual(m.acc, expected_output)
 
 
 
