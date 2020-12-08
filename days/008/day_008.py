@@ -1,5 +1,4 @@
-from collections import defaultdict
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import List
 
 import parse
@@ -8,13 +7,6 @@ import parse
 def read() -> List[str]:
     with open('input.txt') as f:
         return [x.strip() for x in f.readlines()]
-
-
-# @dataclass(frozen=True)
-# class Frame:
-#     op: str = field(hash=True)
-#     data: int = field(hash=True)
-#     acc: int = field(hash=True, default=0)
 
 
 @dataclass
@@ -41,6 +33,9 @@ class Instruction:
             self.op = "jmp"
 
 
+Program = List[Instruction]
+
+
 class InfiniteLoopError(Exception):
     pass
 
@@ -50,10 +45,10 @@ class ProgramComplete(Exception):
 
 
 class Machine:
-    def __init__(self, program):
-        self.acc = 0
-        self.cursor = 0
-        self.program = program
+    def __init__(self, program: Program):
+        self.acc: int = 0
+        self.cursor: int = 0
+        self.program: Program = program
 
     def boot(self):
         self.acc = 0
@@ -64,7 +59,7 @@ class Machine:
     def execute(self):
         self._execute_program(self.program)
 
-    def _execute_program(self, program):
+    def _execute_program(self, program: Program):
         while True:
             try:
                 inst = program[self.cursor]
@@ -98,14 +93,14 @@ class Machine:
             except InfiniteLoopError:
                 program[index].repair()
 
-    def _handle_acc(self, inst):
+    def _handle_acc(self, inst: Instruction):
         self.acc += inst.data
         self.cursor += 1
 
-    def _handle_jmp(self, inst):
+    def _handle_jmp(self, inst: Instruction):
         self.cursor += inst.data
 
-    def _handle_nop(self, inst):
+    def _handle_nop(self, inst: Instruction):
         self.cursor += 1
 
     def print_debug(self):
