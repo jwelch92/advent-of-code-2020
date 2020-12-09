@@ -61,7 +61,31 @@ def part_two():
     #
     # What is the encryption weakness in your XMAS-encrypted list of numbers?
 
+    magic = 373803594
+
+    xmas = read()
+    count = len(xmas)
+    for i in range(0, count):
+        running = 0
+        running_index = i
+        while running < magic:
+            running += xmas[running_index]
+            running_index += 1
+        if running == magic:
+            print("found")
+            print(i, running_index)
+            r = xmas[i: running_index]
+            print(r)
+            print(sum(r))
+            print(r == magic)
+
+
+            print("ans", min(r) + max(r))
+            break
+
+
+
 
 if __name__ == '__main__':
-    part_one()
+    # part_one()
     part_two()
