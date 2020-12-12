@@ -1,27 +1,40 @@
 import unittest
 
-from .day_011 import Machine, Instruction, InfiniteLoopError
+from .day_011 import solve_one
 
+
+test_raw = """L.LL.LL.LL
+LLLLLLL.LL
+L.L.L..L..
+LLLL.LL.LL
+L.LL.LL.LL
+L.LLLLL.LL
+..L.L.....
+LLLLLLLLLL
+L.LLLLLL.L
+L.LLLLL.LL"""
+test = [list(x) for x in test_raw.splitlines()]
+
+sample_final_raw = """#.#L.L#.##
+#LLL#LL.L#
+L.#.L..#..
+#L##.##.L#
+#.#L.LL.LL
+#.#L#L#.##
+..L.L.....
+#L#L##L#L#
+#.LLLLLL.L
+#.#L#L#.##"""
+
+sample_final = [list(x) for x in sample_final_raw.splitlines()]
 
 class MyTestCase(unittest.TestCase):
     def test_part_one(self):
-        puzzle_input = """nop +0
-acc +1
-jmp +4
-acc +3
-jmp -3
-acc -99
-acc +1
-jmp -4
-acc +6
-"""
-        expected_output = 5 # value in acc before infinite loop
-        m = Machine([Instruction.from_instruction(line) for line in puzzle_input.splitlines()])
+        answer, final_grid = solve_one(test)
+        self.assertEqual(answer, 37)
+        self.assertEqual(sample_final, final_grid)
 
-        try:
-            m.execute()
-        except InfiniteLoopError:
-            self.assertEqual(m.acc, expected_output)
+
 
 
 
