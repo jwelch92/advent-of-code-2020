@@ -1,18 +1,9 @@
-import pprint
 from collections import defaultdict
-from dataclasses import dataclass, field
 from functools import reduce
+from typing import Dict, Set
 from typing import List
+
 import parse
-
-
-# @dataclass(frozen=True)
-# class Bag:
-#     color: str = field(hash=True)
-#     held: List["Bag"]
-#
-#     def contains(self, bag: "Bag") -> bool:
-#         return any(x == bag for x in self.held)
 
 
 def read() -> List[str]:
@@ -22,27 +13,42 @@ def read() -> List[str]:
 
 shiny_gold = "shiny gold"
 
-def parse_input(puzzle_input):
-    bags = defaultdict(list)
+Bags = Dict[str, Dict[str, int]]
+
+
+def parse_input(puzzle_input) -> Bags:
+    bags = defaultdict(dict)
 
     for line in puzzle_input:
         color, raw_contains = line.split(" bags contain ")
         for c in parse.findall("{count:d} {color} bag", raw_contains):
-            bags[color].extend([c["color"]] * c["count"])
+            bags[color][c["color"]] = c["count"]
     return bags
+
 
 def solve_one(puzzle_input: List[str]) -> int:
     bags = parse_input(puzzle_input)
-    return len(recur_bags(bags, shiny_gold))
+    return len(contains_bag(bags, shiny_gold))
 
-# ugh I didn't get here on my own. Shoutout reddit for teaching me cool python tricks
-def recur_bags(bags, color):
+
+# ugh I didn't get here on my own. Shout out reddit for teaching me cool python tricks
+def contains_bag(bags: Bags, color: str) -> Set[str]:
     parents = set(parent_name for (parent_name, held) in bags.items() if color in held)
-    print(parents)
-    return reduce(lambda a, b: a.union(recur_bags(bags, b)), parents, parents)
+    return reduce(lambda a, b: a.union(contains_bag(bags, b)), parents, parents)
 
 
+def search(bags: Bags, bag: str) -> int:
+    count = 1
+    for s in bags[bag]:
+        m = bags[bag][s]
+        count += m * search(bags, s)
+    return count
 
+
+def solve_two(puzzle_input: List[str]) -> int:
+    bags = parse_input(puzzle_input)
+    ans = search(bags, shiny_gold) - 1
+    return ans
 
 
 def part_one():
@@ -52,9 +58,8 @@ def part_one():
 
 def part_two():
     print('Part two')
-    bags = parse_input(read())
-
-
+    ans = solve_two(read())
+    print("ans", ans)
 
 
 if __name__ == '__main__':
