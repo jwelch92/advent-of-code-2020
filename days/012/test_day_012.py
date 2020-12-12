@@ -1,15 +1,19 @@
 import unittest
 
-from .day_012 import solve_one
+from .day_012 import solve_one, solve_two
 
-class MyTestCase(unittest.TestCase):
-    def test_part_one(self):
-        puz = """F10
+puz = """F10
 N3
 F7
 R90
 F11""".splitlines()
+
+class MyTestCase(unittest.TestCase):
+    def test_part_one(self):
         self.assertEqual(solve_one(puz), 25)
+
+    def test_part_two(self):
+        self.assertEqual(solve_two(puz), 286)
 
 
 
