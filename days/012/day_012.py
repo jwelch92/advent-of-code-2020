@@ -59,6 +59,44 @@ def solve_one(puzzle_input):
 
     return abs(x) + abs(y)
 
+def solve_two(puzzle_input):
+    facing = 0
+    x, y = 0, 0
+    wx, wy = 10, 1
+
+    for line in puzzle_input:
+        print(line)
+        move = pat.parse(line)
+        units = int(move["distance"])
+        direction = move["direction"]
+        # F is the only move for the ship but it moves N times towards waypoint in both directions
+        if direction == "F":
+            direction = cardinals[facing % 360]
+            if direction == "N":
+                y += units
+            elif direction == "S":
+                wy -= units
+            elif direction == "E":
+                wx += units
+            elif direction == "W":
+
+        if direction == "N":
+            wy += units
+        elif direction == "S":
+            wy -= units
+        elif direction == "E":
+            wx += units
+        elif direction == "W":
+            wx -= units
+        elif direction == "L":
+            facing = (facing - units) % 360
+        elif direction == "R":
+            facing = (facing + units) % 360
+
+        print(x, y)
+    print(x, y)
+
+    return abs(x) + abs(y)
 
 def part_one():
     print("Part one")
