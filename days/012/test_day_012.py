@@ -1,27 +1,16 @@
 import unittest
 
-from .day_012 import Machine, Instruction, InfiniteLoopError
-
+from .day_012 import solve_one
 
 class MyTestCase(unittest.TestCase):
     def test_part_one(self):
-        puzzle_input = """nop +0
-acc +1
-jmp +4
-acc +3
-jmp -3
-acc -99
-acc +1
-jmp -4
-acc +6
-"""
-        expected_output = 5 # value in acc before infinite loop
-        m = Machine([Instruction.from_instruction(line) for line in puzzle_input.splitlines()])
+        puz = """F10
+N3
+F7
+R90
+F11""".splitlines()
+        self.assertEqual(solve_one(puz), 25)
 
-        try:
-            m.execute()
-        except InfiniteLoopError:
-            self.assertEqual(m.acc, expected_output)
 
 
 
