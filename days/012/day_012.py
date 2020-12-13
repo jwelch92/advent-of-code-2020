@@ -25,7 +25,7 @@ def solve_one(puzzle_input: List[str]) -> int:
 
     for line in puzzle_input:
         print(line)
-        move = pat.parse(line)
+        move = pat.parse_for_one(line)
         units = int(move["distance"])
         direction = move["direction"]
 
@@ -55,7 +55,7 @@ def solve_two(puzzle_input: List[str]) -> int:
 
     for line in puzzle_input:
         print(line)
-        move = pat.parse(line)
+        move = pat.parse_for_one(line)
         units = int(move["distance"])
         direction = move["direction"]
         # F translate ship N times towards waypoint

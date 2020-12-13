@@ -36,7 +36,7 @@ def read(parser_func: Callable) -> Iterable[PasswordEntry]:
 
 
 def parser(line: str) -> PasswordEntry:
-    g = pat.parse(line.strip())
+    g = pat.parse_for_one(line.strip())
     return PasswordEntry(**g.named)
 
 
