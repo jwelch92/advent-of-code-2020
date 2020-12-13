@@ -14,7 +14,7 @@ def solve_one(arrival, schedule):
 
     return low * bus_id
 
-
+# From rosetta stone code samples
 def chinese_remainder(n, a):
     sum = 0
     prod = reduce(lambda a, b: a * b, n)
@@ -23,7 +23,7 @@ def chinese_remainder(n, a):
         sum += a_i * mul_inv(p, n_i) * p
     return sum % prod
 
-
+# From rosetta stone code samples
 def mul_inv(a, b):
     b0 = b
     x0, x1 = 0, 1
@@ -37,13 +37,14 @@ def mul_inv(a, b):
 
 
 def solve_two(puzzle):
-    pass
-    # part two is just CRT. There's online solvers or some pyton impl like the rostta stone one above.
-    # TODO figure out how plumb my data into one of these lol
+    divs = [bus for _, bus in puzzle]
+    rems = [bus - i for i, bus in puzzle]
+    return chinese_remainder(divs, rems)
+
 
 
 def parse_for_two(p):
-    return p[1].split(",")
+    return [(i, int(bus)) for i, bus in enumerate(p[1].split(",")) if bus != 'x']
 
 
 def parse_for_one(p):

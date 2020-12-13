@@ -1,6 +1,6 @@
 import unittest
 
-from .day_013 import solve_one, solve_two, parse_for_one
+from .day_013 import solve_one, solve_two, parse_for_one, parse_for_two
 
 puzzle_input = """939
 7,13,x,x,59,x,31,19""".splitlines()
@@ -13,7 +13,7 @@ class MyTestCase(unittest.TestCase):
 
 
     def test_part_two(self):
-        self.assertEqual(1068781, solve_two(part_two_input))
+        self.assertEqual(1068781, solve_two(parse_for_two(puzzle_input)))
 
 if __name__ == '__main__':
     unittest.main()
