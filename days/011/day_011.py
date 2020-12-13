@@ -12,6 +12,10 @@ def coords(i):
     s.remove((0, 0))
     return s
 
+cardinals = {
+    point: s for point, s in zip(coords(0), ["NW", "N", "NE", "W", "E", "SW", "S", "SE"])
+}
+
 
 def read():
     with open('input.txt') as f:
@@ -67,36 +71,41 @@ def visualize(grid):
         print("".join(x))
 
 
-def solve_two(puzzle):
+def solve_two(puzzle, limit=-1):
     rows, cols = len(puzzle), len(puzzle[0])
-    valid_row = make_within(0, rows)
-    valid_col = make_within(0, cols)
+    valid_row = make_within(rows)
+    valid_col = make_within(cols)
 
-    iterations = 0
+    num_rounds = 0
     working = copy.deepcopy(puzzle)
     previous = copy.deepcopy(puzzle)
 
     while True:
+        print("STARTING ROUND", num_rounds)
+        # exit early for testing mid points
+        if limit != -1 and num_rounds == limit:
+            print("LIMIT REACHED, EXITING...")
+            break
         for i, j in itertools.product(range(0, rows), range(0, cols)):
             if previous[i][j] == floor:
                 continue
-
+            print("Checking for seat", i, j)
             occupied = 0
             for bx, by in coords(0):
-
-                print(bx, by)
-                for a, b in search_paths(bx, by, max(rows, cols)):
+                print("searching towards", cardinals[(bx, by)])
+                # todo optimize search path edges
+                for a, b in search_paths(bx, by, max(rows-i, cols-j)):
                     # v[i][j] = "@"
-
                     row = i + a
                     col = j + b
                     if not valid_row(row) or not valid_col(col):
-                        continue
+                        break
 
                     print("search deltas", a, b)
                     print("row, col", row, col)
-                    # v[row][col] = "*"
-                    if previous[row][col] in (empty_chair, occupied):
+                    print(previous[row][col])
+                    if previous[row][col] in [empty_chair, occupied_chair]:
+                        print("found a chair")
                         occupied += int(previous[row][col] == occupied_chair)
                         break
                 visualize(working)
@@ -107,16 +116,14 @@ def solve_two(puzzle):
                 working[i][j] = occupied_chair
                 continue
             if previous[i][j] == occupied_chair and occupied >= 5:
+                print("EMPTYING CHAIR", i, j)
                 working[i][j] = empty_chair
-                continue
 
         if working == previous:
             break
-        iterations += 1
+        num_rounds += 1
         previous = copy.deepcopy(working)
 
-        # if iterations > 10:
-        #     break
 
     return count_total_occupied(working), working
 
@@ -147,9 +154,9 @@ t = """.##.##.
 test = [list(x) for x in t.splitlines()]
 
 
-def make_within(start, stop):
+def make_within(r):
     def within(x):
-        return start <= x < stop
+        return x in range(r)
 
     return within
 

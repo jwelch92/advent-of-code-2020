@@ -73,11 +73,99 @@ class MyTestCase(unittest.TestCase):
 
         self.assertEqual(e, acc)
 
-    def test_part_two(self):
-        answer, final_grid = solve_two(test)
-        visualize(final_grid)
-        self.assertEqual(answer, 26)
-        self.assertEqual(part_two_final, final_grid)
+    def test_part_two_iterations(self):
+        after_one = to_grid("""#.##.##.##
+#######.##
+#.#.#..#..
+####.##.##
+#.##.##.##
+#.#####.##
+..#.#.....
+##########
+#.######.#
+#.#####.##""")
+
+        after_two = to_grid("""#.LL.LL.L#
+#LLLLLL.LL
+L.L.L..L..
+LLLL.LL.LL
+L.LL.LL.LL
+L.LLLLL.LL
+..L.L.....
+LLLLLLLLL#
+#.LLLLLL.L
+#.LLLLL.L#""")
+
+        after_three = to_grid("""#.L#.##.L#
+#L#####.LL
+L.#.#..#..
+##L#.##.##
+#.##.#L.##
+#.#####.#L
+..#.#.....
+LLL####LL#
+#.L#####.L
+#.L####.L#""")
+
+        after_four = to_grid("""#.L#.L#.L#
+#LLLLLL.LL
+L.L.L..#..
+##LL.LL.L#
+L.LL.LL.L#
+#.LLLLL.LL
+..L.L.....
+LLLLLLLLL#
+#.LLLLL#.L
+#.L#LL#.L#""")
+
+        after_five = to_grid("""#.L#.L#.L#
+#LLLLLL.LL
+L.L.L..#..
+##L#.#L.L#
+L.L#.#L.L#
+#.L####.LL
+..#.#.....
+LLL###LLL#
+#.LLLLL#.L
+#.L#LL#.L#""")
+
+        stable = to_grid("""#.L#.L#.L#
+#LLLLLL.LL
+L.L.L..#..
+##L#.#L.L#
+L.L#.LL.L#
+#.LLLL#.LL
+..#.L.....
+LLL###LLL#
+#.LLLLL#.L
+#.L#LL#.L#""")
+
+        _, working = solve_two(test, limit=1)
+        self.assertEqual(after_one, working, msg="After one iteration")
+
+        _, working = solve_two(test, limit=2)
+        self.assertEqual(after_two, working, msg="After two iteration")
+
+        # _, working = solve_two(test, limit=3)
+        # self.assertEqual(after_three, working, msg="After three iteration")
+        #
+        # _, working = solve_two(test, limit=4)
+        # self.assertEqual(after_four, working, msg="After four iteration")
+        #
+        # _, working = solve_two(test, limit=5)
+        # self.assertEqual(after_five, working, msg="After five iteration")
+        #
+        # _, working = solve_two(test, limit=6)
+        # self.assertEqual(stable, working, msg="After six iteration")
+        #
+        # _, working = solve_two(test, limit=7)
+        # self.assertEqual(stable, working, msg="stable iterations")
+
+    # def test_part_two(self):
+    #     answer, final_grid = solve_two(test)
+    #     visualize(final_grid)
+    #     self.assertEqual(answer, 26)
+    #     self.assertEqual(part_two_final, final_grid)
 
 
 if __name__ == '__main__':
