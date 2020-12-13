@@ -5,23 +5,12 @@ from pprint import pprint as pp
 
 floor, empty_chair, occupied_chair, = ".", "L", "#"
 
-SURROUND_COORDS = list(itertools.product(range(-1, 2), range(-1, 2)))
-SURROUND_COORDS.remove((0, 0))
-
 
 @cache
 def coords(i):
     s = list(itertools.product(range(i - 1, i + 2), repeat=2))
     s.remove((0, 0))
     return s
-
-
-def search_paths(i, limit):
-    rad = 1
-    while rad < limit:
-        for x, y in coords(i):
-            yield x*rad, y*rad
-        rad += 1
 
 
 def read():
@@ -38,16 +27,15 @@ def solve_one(puzzle_input):
     iterations = 0
     working = copy.deepcopy(puzzle_input)
     previous = copy.deepcopy(puzzle_input)
+    rows = len(working)
+    cols = len(working[0])
     while True:
-        rows = len(working)
-        cols = len(working[0])
-
         for i, j in itertools.product(range(0, rows), range(0, cols)):
             if previous[i][j] == floor:
                 continue
 
             occupied = 0
-            for a, b in coords(0, 1):
+            for a, b in coords(0):
                 row = i + a
                 col = j + b
                 if (row >= 0 and col >= 0) and (row < rows and col < cols):
@@ -67,33 +55,86 @@ def solve_one(puzzle_input):
     return count_total_occupied(working), working
 
 
+def search_paths(x, y, limit):
+    rad = 1
+    while rad < limit:
+        yield x * rad, y * rad
+        rad += 1
+
+
+def visualize(grid):
+    for x in grid:
+        print("".join(x))
+
+
+def solve_two(puzzle):
+    rows, cols = len(puzzle), len(puzzle[0])
+    valid_row = make_within(0, rows)
+    valid_col = make_within(0, cols)
+
+    iterations = 0
+    working = copy.deepcopy(puzzle)
+    previous = copy.deepcopy(puzzle)
+
+    while True:
+        for i, j in itertools.product(range(0, rows), range(0, cols)):
+            if previous[i][j] == floor:
+                continue
+
+            occupied = 0
+            for bx, by in coords(0):
+
+                print(bx, by)
+                for a, b in search_paths(bx, by, max(rows, cols)):
+                    # v[i][j] = "@"
+
+                    row = i + a
+                    col = j + b
+                    if not valid_row(row) or not valid_col(col):
+                        continue
+
+                    print("search deltas", a, b)
+                    print("row, col", row, col)
+                    # v[row][col] = "*"
+                    if previous[row][col] in (empty_chair, occupied):
+                        occupied += int(previous[row][col] == occupied_chair)
+                        break
+                visualize(working)
+
+            print("occ", occupied)
+
+            if previous[i][j] == empty_chair and occupied == 0:
+                working[i][j] = occupied_chair
+                continue
+            if previous[i][j] == occupied_chair and occupied >= 5:
+                working[i][j] = empty_chair
+                continue
+
+        if working == previous:
+            break
+        iterations += 1
+        previous = copy.deepcopy(working)
+
+        # if iterations > 10:
+        #     break
+
+    return count_total_occupied(working), working
+
+    # for x, y in search_paths(0, max(rows, cols)):
+    # print(x, y)
+    # rx = r + x
+    # cy = c + y
+    #
+    #
+    # print(test[rx][cy])
+
+
 def part_one():
     print('Part one')
     puzzle = read()
     ans, _ = solve_one(puzzle)
     print("ans", ans)
 
-
-# def search_paths(w, h):
-#     # to the left
-#
-#     # to the right
-#     for y in range(0, h):
-#         print('right')
-#         yield ((x, y) for x in range(w))
-#
-#     for x in range(0, w):
-#         print('down')
-#         yield ((x, y) for y in range(h))
-#
-#     # down and to the right
-#     for x0 in range(-h + 1, w):
-#         print('down right')
-#         yield ((x0 + y, y) for y in range(max(0, -x0), min(h, w - x0)))
-#         # down and to the left
-#     for x0 in range(0, w + h):
-#         print('down left')
-#         yield ((x0 - y, y) for y in range(max(0, x0 - w + 1), min(h, x0 + 1)))
 
 t = """.##.##.
 #.#.#.#
@@ -105,32 +146,43 @@ t = """.##.##.
 
 test = [list(x) for x in t.splitlines()]
 
+
+def make_within(start, stop):
+    def within(x):
+        return start <= x < stop
+
+    return within
+
+
 def part_two():
     print('Part two')
     puzzle = read()
     w, h = len(puzzle), len(puzzle[0])
-    seats = {
-        (x, y): {(x, y)} for x, y in itertools.product(range(w), range(h)) if puzzle[x][y] != floor
-    }
+    # seats = {
+    #     (x, y): {(x, y)} for x, y in itertools.product(range(w), range(h)) if puzzle[x][y] != floor
+    # }
 
-    print(seats)
+    # print(seats)
+
 
 @cache
 def valid(x, y, dx, dy, rows, cols):
-    return x+dx not in range(rows) or y+dy not in range(cols)
+    return x + dx not in range(rows) or y + dy not in range(cols)
+
 
 if __name__ == '__main__':
     # part_one()
     part_two()
-    rows, cols = len(test), len(test[0])
-
-    r, c = 3, 3
-    # wip multiplier based search paths
-    for x, y in search_paths(0, max(rows, cols)):
-        print(x, y)
-        # if r+x not in range(rows) or c+y not in range(cols):
-        #     continue
-        if not valid(r, c, x, y, rows, cols):
-            continue
-        print(test[r+x][c+y])
-
+    # rows, cols = len(test), len(test[0])
+    # valid_row = make_within(0, rows)
+    # valid_col = make_within(0, cols)
+    # r, c = 3, 3
+    # # wip multiplier based search paths
+    # for x, y in search_paths(0, max(rows, cols)):
+    #     print(x, y)
+    #     rx = r + x
+    #     cy = c + y
+    #
+    #     if not valid_row(rx) or not valid_col(cy):
+    #         continue
+    #     print(test[rx][cy])
