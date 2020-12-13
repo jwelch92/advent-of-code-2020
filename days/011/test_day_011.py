@@ -1,7 +1,7 @@
 import unittest
 from typing import List
 
-from .day_011 import solve_one, solve_two, visualize, search_paths, coords
+from .day_011 import solve_one, solve_two, visualize, search_paths, surrounding_coords
 
 
 def to_grid(raw: str) -> List[List[str]]:
@@ -54,7 +54,7 @@ class MyTestCase(unittest.TestCase):
 
     def test_coords(self):
         e = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
-        self.assertEqual(coords(0), e)
+        self.assertEqual(surrounding_coords(0), e)
 
     def test_search_paths(self):
         e = [(-1, -1), (-2, -2),
@@ -67,7 +67,7 @@ class MyTestCase(unittest.TestCase):
              (1, 1), (2, 2)
              ]
         acc = []
-        for ca, cb in coords(0):
+        for ca, cb in surrounding_coords(0):
             for dx, dy in search_paths(ca, cb, 3):
                 acc.append((dx, dy))
 
@@ -140,32 +140,32 @@ LLL###LLL#
 #.LLLLL#.L
 #.L#LL#.L#""")
 
-        _, working = solve_two(test, limit=1)
+        _, working = solve_two(test, round_limit=1)
         self.assertEqual(after_one, working, msg="After one iteration")
 
-        _, working = solve_two(test, limit=2)
+        _, working = solve_two(test, round_limit=2)
         self.assertEqual(after_two, working, msg="After two iteration")
 
-        # _, working = solve_two(test, limit=3)
-        # self.assertEqual(after_three, working, msg="After three iteration")
-        #
-        # _, working = solve_two(test, limit=4)
-        # self.assertEqual(after_four, working, msg="After four iteration")
-        #
-        # _, working = solve_two(test, limit=5)
-        # self.assertEqual(after_five, working, msg="After five iteration")
-        #
-        # _, working = solve_two(test, limit=6)
-        # self.assertEqual(stable, working, msg="After six iteration")
-        #
-        # _, working = solve_two(test, limit=7)
-        # self.assertEqual(stable, working, msg="stable iterations")
+        _, working = solve_two(test, round_limit=3)
+        self.assertEqual(after_three, working, msg="After three iteration")
 
-    # def test_part_two(self):
-    #     answer, final_grid = solve_two(test)
-    #     visualize(final_grid)
-    #     self.assertEqual(answer, 26)
-    #     self.assertEqual(part_two_final, final_grid)
+        _, working = solve_two(test, round_limit=4)
+        self.assertEqual(after_four, working, msg="After four iteration")
+
+        _, working = solve_two(test, round_limit=5)
+        self.assertEqual(after_five, working, msg="After five iteration")
+
+        _, working = solve_two(test, round_limit=6)
+        self.assertEqual(stable, working, msg="After six iteration")
+
+        _, working = solve_two(test, round_limit=7)
+        self.assertEqual(stable, working, msg="stable iterations")
+
+    def test_part_two(self):
+        answer, final_grid = solve_two(test)
+        visualize(final_grid)
+        self.assertEqual(answer, 26)
+        self.assertEqual(part_two_final, final_grid)
 
 
 if __name__ == '__main__':

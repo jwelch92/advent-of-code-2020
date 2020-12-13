@@ -1,19 +1,21 @@
 import copy
 import itertools
 from functools import cache
-from pprint import pprint as pp
 
 floor, empty_chair, occupied_chair, = ".", "L", "#"
 
 
 @cache
-def coords(i):
+def surrounding_coords(i):
     s = list(itertools.product(range(i - 1, i + 2), repeat=2))
     s.remove((0, 0))
     return s
 
+
+mods = surrounding_coords(0)
+
 cardinals = {
-    point: s for point, s in zip(coords(0), ["NW", "N", "NE", "W", "E", "SW", "S", "SE"])
+    point: s for point, s in zip(surrounding_coords(0), ["NW", "N", "NE", "W", "E", "SW", "S", "SE"])
 }
 
 
@@ -39,11 +41,10 @@ def solve_one(puzzle_input):
                 continue
 
             occupied = 0
-            for a, b in coords(0):
-                row = i + a
-                col = j + b
+            for row, col in list(tuple(map(sum, zip((i, j), mod))) for mod in mods):
                 if (row >= 0 and col >= 0) and (row < rows and col < cols):
                     occupied += int(previous[row][col] == occupied_chair)
+
             if previous[i][j] == empty_chair and occupied == 0:
                 working[i][j] = occupied_chair
                 continue
@@ -71,72 +72,56 @@ def visualize(grid):
         print("".join(x))
 
 
-def solve_two(puzzle, limit=-1):
-    rows, cols = len(puzzle), len(puzzle[0])
+def solve_two(puzzle_input, round_limit=-1):
+    working = copy.deepcopy(puzzle_input)
+    previous = copy.deepcopy(puzzle_input)
+    rows = len(working)
+    cols = len(working[0])
     valid_row = make_within(rows)
     valid_col = make_within(cols)
-
     num_rounds = 0
-    working = copy.deepcopy(puzzle)
-    previous = copy.deepcopy(puzzle)
-
     while True:
-        print("STARTING ROUND", num_rounds)
-        # exit early for testing mid points
-        if limit != -1 and num_rounds == limit:
+        if round_limit != -1 and num_rounds == round_limit:
             print("LIMIT REACHED, EXITING...")
             break
+
         for i, j in itertools.product(range(0, rows), range(0, cols)):
             if previous[i][j] == floor:
                 continue
-            print("Checking for seat", i, j)
             occupied = 0
-            for bx, by in coords(0):
-                print("searching towards", cardinals[(bx, by)])
-                # todo optimize search path edges
-                for a, b in search_paths(bx, by, max(rows-i, cols-j)):
-                    # v[i][j] = "@"
-                    row = i + a
-                    col = j + b
-                    if not valid_row(row) or not valid_col(col):
-                        break
+            moves = list(tuple(map(sum, zip((i, j), mod))) for mod in mods)
+            for index, (x, y) in enumerate(moves):
+                found = False
 
-                    print("search deltas", a, b)
-                    print("row, col", row, col)
-                    print(previous[row][col])
-                    if previous[row][col] in [empty_chair, occupied_chair]:
-                        print("found a chair")
-                        occupied += int(previous[row][col] == occupied_chair)
-                        break
-                visualize(working)
-
-            print("occ", occupied)
+                while not found:
+                    if not valid_row(x) or not valid_col(y):
+                        found = True
+                    elif previous[x][y] == floor:
+                        # expand search additively by the coords
+                        x += mods[index][0]
+                        y += mods[index][1]
+                    elif previous[x][y] == empty_chair or previous[x][y] == occupied_chair:
+                        occupied += int(previous[x][y] == occupied_chair)
+                        found = True
 
             if previous[i][j] == empty_chair and occupied == 0:
                 working[i][j] = occupied_chair
                 continue
             if previous[i][j] == occupied_chair and occupied >= 5:
-                print("EMPTYING CHAIR", i, j)
                 working[i][j] = empty_chair
+                continue
 
         if working == previous:
             break
+
         num_rounds += 1
         previous = copy.deepcopy(working)
 
-
     return count_total_occupied(working), working
-
-    # for x, y in search_paths(0, max(rows, cols)):
-    # print(x, y)
-    # rx = r + x
-    # cy = c + y
-    #
-    #
-    # print(test[rx][cy])
 
 
 def part_one():
+    # super slow
     print('Part one')
     puzzle = read()
     ans, _ = solve_one(puzzle)
@@ -162,14 +147,11 @@ def make_within(r):
 
 
 def part_two():
+    # even slower
     print('Part two')
     puzzle = read()
-    w, h = len(puzzle), len(puzzle[0])
-    # seats = {
-    #     (x, y): {(x, y)} for x, y in itertools.product(range(w), range(h)) if puzzle[x][y] != floor
-    # }
-
-    # print(seats)
+    ans, _ = solve_two(puzzle)
+    print("ans", ans)
 
 
 @cache
@@ -178,18 +160,5 @@ def valid(x, y, dx, dy, rows, cols):
 
 
 if __name__ == '__main__':
-    # part_one()
+    part_one()
     part_two()
-    # rows, cols = len(test), len(test[0])
-    # valid_row = make_within(0, rows)
-    # valid_col = make_within(0, cols)
-    # r, c = 3, 3
-    # # wip multiplier based search paths
-    # for x, y in search_paths(0, max(rows, cols)):
-    #     print(x, y)
-    #     rx = r + x
-    #     cy = c + y
-    #
-    #     if not valid_row(rx) or not valid_col(cy):
-    #         continue
-    #     print(test[rx][cy])
