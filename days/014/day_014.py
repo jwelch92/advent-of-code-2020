@@ -4,8 +4,6 @@ from typing import List
 
 import parse
 
-# from threading import Lock
-
 mask_pat = parse.compile("mask = {}")
 set_pat = parse.compile("mem[{}] = {}")
 
@@ -50,7 +48,6 @@ def solve_two(puzzle):
     for chunk in puzzle:
         mask, instr = chunk[0], chunk[1:]
         for addr, value in instr:
-            print(mask, addr, value)
             variants = []
             new_addr = 0
             for i in range(36):
@@ -59,21 +56,12 @@ def solve_two(puzzle):
                     variants.append(1 << i)
                 elif c == "1" or (addr & (1 << i) > 0):
                     new_addr += (1 << i)
-            # this is way too slow, maybe go back and just use strings?
-            print(variants)
             for k in range(len(variants) + 1):
-                print("variants start", k)
                 for c in itertools.combinations(variants, k):
-                    print(c)
-            #         offset = sum(c)
-            #         print(offset)
-            #         print("writing to", new_addr + offset)
-            #         mem[new_addr + offset] = value
+                    offset = sum(c)
+                    mem[new_addr + offset] = value
 
     return sum(mem.values())
-
-
-
 
 
 def part_one():
@@ -86,8 +74,10 @@ def part_one():
 
 def part_two():
     print('Part two')
+    p = parser(read())
+    print(solve_two(p))
 
 
 if __name__ == '__main__':
-    # part_one()
+    part_one()
     part_two()
