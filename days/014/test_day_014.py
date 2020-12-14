@@ -1,6 +1,6 @@
 import unittest
 
-from .day_014 import parser, solve_one
+from .day_014 import parser, solve_one, solve_two
 
 puzzle_input = """mask = XXXXXXXXXXXXXXXXXXXXXXXXXXXXX1XXXX0X
 mem[8] = 11
@@ -20,7 +20,8 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(solve_one(p), 165)
 
     def test_part_two(self):
-        pass
+        p = parser(puzzle_input)
+        self.assertEqual(solve_two(p), 208)
 
 
 if __name__ == '__main__':

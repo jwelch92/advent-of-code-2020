@@ -1,3 +1,4 @@
+import itertools
 from collections import defaultdict
 from typing import List
 from functools import reduce
@@ -34,22 +35,41 @@ def read() -> List[str]:
 def apply_mask(mask, val):
     pass
 
-# def solve_one(puzzle):
-#     mem = defaultdict(int)
-#     for chunk in puzzle:
-#         mask, instr = chunk[0], chunk[1:]
-#         for addr, value in instr:
-#             print(addr, value)
-#             val = 0
-#             for i in range(36):
-#                 c = mask[-i-1]
-#                 print(c)
-#                 # if 1 in mask or a high bit X then OR the bit
-#                 if c == "1" or (c == 'X' and (value & (1 << i)) > 0):
-#                     val |= (1 << i)
-#             mem[addr] = val
-#             print(val)
-#     return sum(mem.values())
+def solve_one(puzzle):
+    mem = defaultdict(int)
+    for chunk in puzzle:
+        mask, instr = chunk[0], chunk[1:]
+        for addr, value in instr:
+            val = 0
+            for i in range(36):
+                c = mask[~i]
+                # if 1 in mask or a high bit X then OR the bit
+                if c == "1" or (c == 'X' and (value & (1 << i)) > 0):
+                    val |= (1 << i)
+            mem[addr] = val
+    return sum(mem.values())
+
+def solve_two(puzzle):
+    mem = defaultdict(int)
+    for chunk in puzzle:
+        mask, instr = chunk[0], chunk[1:]
+        for addr, value in instr:
+            variants = []
+            new_addr = 0
+            for i in range(36):
+                c = mask[~i]
+                if c == "X":
+                    variants.append(1 << i)
+                elif c == "1" or (addr & (1 << i) > 0):
+                    new_addr += (1 << i)
+            for k in range(len(variants) + 1):
+                for c in itertools.combinations(variants, k):
+                    offset = sum(c)
+                    mem[new_addr + offset] = value
+
+    return sum(mem.values())
+
+
 
 # dumb attempt at using bitarry to do it "right" but loops and lists are easier actually
 # def solve_one(puzzle):
